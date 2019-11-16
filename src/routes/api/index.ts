@@ -1,5 +1,5 @@
 import express from 'express'
-import Api from './api'
+import utils from './utils'
 const Router = express.Router()
-Router.use('/api', Api)
+Router.use('/utils', utils)
 export = Router

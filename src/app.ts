@@ -3,7 +3,7 @@ import express from 'express'
 import path from 'path'
 import logger from 'morgan'
 import cookieParser = require('cookie-parser')
-// import Router from './routes'
+import Router from './routes'
 
 const App = express()
 
@@ -19,10 +19,7 @@ App.use(cookieParser())
 App.use(express.static(path.join(__dirname, 'public')))
 
 // 路由相关
-// App.use('/', Router)
-App.get('/', (req, res)=> {
-  res.send('你好世界')
-})
+App.use('/', Router)
 
 // 404
 App.use((req, res, next) => {
