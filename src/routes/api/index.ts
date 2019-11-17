@@ -1,5 +1,8 @@
+// Api路由
 import express from 'express'
-import utils from './utils'
+import Utils from './Utils'
+import User from './User'
 const Router = express.Router()
-Router.use('/utils', utils)
+Router.use('/utils', Utils)
+Router.use('/user', User)
 export = Router
