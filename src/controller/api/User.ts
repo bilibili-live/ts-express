@@ -1,55 +1,99 @@
 import JWT from 'jsonwebtoken'
 import Model from '../../model'
-import { userCode } from '../../const/code'
+import { userCreateCode, userCreateMsg, userCheckMsg } from '../../const/code'
+import { expiresIn, JWT_BOND } from '../../const/user'
+import { JWT_KEY } from '../../config'
 const Table: string = 'user'
 
+function createStatusCode(status: any): any {
+  return {
+    code: userCreateCode[status],
+    msg: userCreateMsg[status]
+  }
+}
+
 export = {
-  out: function (): any {
-
+  out: function (res: any): void {
+    res.clearCookie(JWT_BOND)
   },
-  login: function (): any {
-
+  login: async function (data: any): Promise<any> {
+    let msg: string = userCheckMsg.success, token: string = ''
+    const userInfo = await this.checkUserName(data.username, true)
+    if (userInfo ) {
+      if ((userInfo as any).password == data.password) {
+        token = JWT.sign(data, JWT_KEY, { expiresIn })
+      } else msg = userCheckMsg.passwordWrong
+    } else {
+      msg = userCheckMsg.userWrong
+    }
+    return { msg, token }
   },
-  checkUserName: function (username: string): boolean {
+  tokenChecker: async function (token: string): Promise<string | boolean> {
+    return await new Promise(rcv=> {
+      JWT.verify(token, JWT_KEY, (err, res)=> {
+        let isToken: boolean | string = false
+        if (!err) {
+          isToken = (res as any).username
+        }
+        rcv(isToken)
+      })
+    })
+  },
+  checkUserName: async function (
+    username: string,
+    full: boolean = false
+  ): Promise<boolean | object> {
     let isAlready: boolean = true
     const key: string = `username`
-    Model.query(`SELECT * FROM \`${ Table }\` WHERE ${ key }="${ username }"`,(err, results)=> {
-      if (!err || !results.length) {
-        isAlready = false
-      }
+    isAlready = await new Promise(rcv=> {
+      Model.query(
+        `SELECT * FROM \`${ Table }\` WHERE ${ key }="${ username }"`,
+        (err, results)=> {
+          if (!err && !results.length) {
+            rcv(false)
+          } else {
+            if (full) {
+              rcv(results[0])
+            } else rcv(true)
+          }
+        }
+      )
     })
     return isAlready
   },
-  create: function (data: any) {
-    const code = userCode
-    const isAlready = this.checkUserName(data.username)
+  create: async function (data: any) {
+    const isAlready = await this.checkUserName(data.username)
     if (isAlready) {
-      return code.already
+      return createStatusCode('already')
     }
-    let result = code.faild
-    Model.query(`INSERT INTO \`${ Table }\`(
-      \`id\`,
-      \`nickname\`,
-      \`username\`,
-      \`password\`,
-      \`login\`,
-      \`view\`,
-      \`admin\`
-    ) VALUES (
-      '${ data.id }',
-      '${ data.nickname }',
-      '${ data.username }',
-      '${ data.password }',
-      '${ data.login }',
-      ${ data.view },
-      ${ data.admin }
-    )`, (err, results)=> {
-      if (!err) {
-        result = code.success
-      } else {
-        throw new Error(err as any)
-      }
+    let result = createStatusCode('faild')
+    const isSucess = await new Promise(rcv=> {
+      Model.query(`INSERT INTO \`${ Table }\`(
+        \`id\`,
+        \`nickname\`,
+        \`username\`,
+        \`password\`,
+        \`login\`,
+        \`view\`,
+        \`admin\`
+      ) VALUES (
+        '${ data.id }',
+        '${ data.nickname }',
+        '${ data.username }',
+        '${ data.password }',
+        '${ data.login }',
+        ${ data.view },
+        ${ data.admin }
+      )`, (err, results)=> {
+        if (!err) {
+          rcv(true)
+        } else {
+          rcv(false)
+          // throw new Error(err as any)
+        }
+      })
     })
+    if (isSucess) result = createStatusCode('success')
     return result
   }
 }

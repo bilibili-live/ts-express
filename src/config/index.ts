@@ -12,3 +12,4 @@ export const mysql = {
 
 export const isDEV: boolean = process.env.NODE_ENV == 'dev'
 export const APP_PORT: number = isDEV ? conf.APP_DEV_PORT : conf.APP_PROD_PORT
+export const JWT_KEY: string = conf.JWT_KEY
