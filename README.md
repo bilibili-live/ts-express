@@ -16,4 +16,17 @@ cnpm i
 yarn start:dev
 ```
 
-将 `.env.example` 改成 `.env` 自行配置 😊
+将 `.env.example` 改成 `.env` 自行配置, 示例:
+
+```
+APP_DEV_PORT=2333
+APP_PROD_PORT=4399
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=8889
+MYSQL_USER=root
+MYSQL_PWD=root
+MYSQL_DATABASE=dev
+JWT_KEY=10086
+```
+
+使用 `test_db.ts` 来测试你的 `mysql` 是否连接成功
