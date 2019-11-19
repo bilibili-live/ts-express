@@ -61,10 +61,7 @@ Router.post('/login',[
   }
   const Login = await Model.login(data)
   if (Login.token) {
-    res.cookie(JWT_BOND, Login.token, {
-      maxAge: expiresIn,
-      path: '/'
-    })
+    res.cookie(JWT_BOND, Login.token)
     res.send(Login)
   } else {
     req.body.errors = Login.msg

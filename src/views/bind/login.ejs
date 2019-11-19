@@ -55,8 +55,8 @@
   new Vue({
     el: "#App",
     data: {
-      username: '',
-      password: ''
+      username: 'd1y',
+      password: '1'
     },
     methods: {
       logined() {
@@ -69,7 +69,13 @@
             password
           }
         }).then(res=> {
-          console.log(res)
+          const { data: conf } = res
+          const isToken = conf.hasOwnProperty('token')
+          if (isToken) {
+            swal('登录成功').then(r=> {
+              window.location = '/user/home'
+            })
+          }
         })
       }
     }

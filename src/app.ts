@@ -46,7 +46,9 @@ App.use(( err: any, req: any , res: any, next: any) => {
   res.locals.message = err.message
   res.locals.error = req.app.get('env') === 'development' ? err : {}
   res.status(err.status || 500)
-  res.render('template/error')
+  res.render('template/error', {
+    post_title: 'error'
+  })
 })
 
 export = App

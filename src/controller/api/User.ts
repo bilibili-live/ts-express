@@ -83,5 +83,17 @@ export = {
       is = false
     }
     return is
+  },
+  userAutoAddView: async function(username: string, count: number = 1): Promise<boolean> {
+    let is = true
+    try {
+      const send = {
+        view: count
+      }
+      await Model('user').where({ username }).increment((send as any))
+    } catch {
+      is = false
+    }
+    return is
   }
 }
