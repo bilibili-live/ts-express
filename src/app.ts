@@ -23,8 +23,8 @@ App.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
 // 设置模板
 App.set('views', path.join(__dirname, 'views'))
 App.set('view engine', 'ejs')
-App.set('layout extractScripts', true)
-App.set('layout extractStyles', true)
+// App.set('layout extractScripts', true)
+// App.set('layout extractStyles', true)
 App.set('layout', 'template/layer/layout')
 App.use(expressLayouts)
 

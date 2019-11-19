@@ -9,10 +9,11 @@ const options = {
   connection
 }
 const Model = Knex(options)
-export = async ()=> await new Promise(async rcv=> {
-  let isSuccess = true
+export = async (middleware: boolean = false): Promise<any> => await new Promise(async rcv=> {
+  let isSuccess: any = true
   try {
-    await Model.select(Model.raw('1')) 
+    await Model.select(Model.raw('1'))
+    if (middleware) isSuccess = Model
   } catch (error) {
     isSuccess = false
   }

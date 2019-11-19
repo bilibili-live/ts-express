@@ -1,7 +1,7 @@
 import express from 'express'
-import Home from './home'
+import Home from './user'
 const Html = express.Router()
 
-Html.use('/home', Home)
+Html.use('/user', Home)
 
 export = Html

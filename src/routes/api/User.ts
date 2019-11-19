@@ -3,7 +3,12 @@ import cuid from 'cuid'
 import asyncHandler from 'express-async-handler'
 import Model from '../../controller/api/User'
 import { check, validationResult } from 'express-validator'
-import { createLimit, expiresIn, JWT_BOND } from '../../const/user'
+import {
+  createLimit, 
+  expiresIn, 
+  JWT_BOND,
+  updateUserData
+} from '../../const/user'
 const Router = express.Router()
 
 Router.post('/create', [
@@ -15,6 +20,7 @@ Router.post('/create', [
     .withMessage(createLimit.msgs.username),
   check('password')
     .exists()
+    .isLength(createLimit.password)
     .withMessage(createLimit.msgs.password)
 ], asyncHandler(async (req, res, next) => {
   const { nickname, username, password } = req.body
@@ -66,7 +72,7 @@ Router.post('/login',[
   }
 }))
 
-Router.get('/clearup', asyncHandler((req, res, next)=>{
+Router.get('/clearup', asyncHandler(async (req, res, next)=>{
   Model.out(res)
   res.send({
     code: 200,
@@ -74,8 +80,24 @@ Router.get('/clearup', asyncHandler((req, res, next)=>{
   })
 }))
 
-Router.post('/update', asyncHandler((req, res, next)=> {
-
+Router.post('/update', asyncHandler(async (req, res, next)=> {
+  let data: updateUserData = req.body
+  let temp = req.cookies[JWT_BOND]
+  if (!(data.nickname || data.password) || !temp) {
+    return next()
+  }
+  let sendUser: string
+  let username = await Model.tokenChecker(temp)
+  if (!username) {
+    req.body.errors.msgs = '用户验证错误'
+    return next()
+  } else sendUser = (username as string)
+  const isUpdate = await Model.update(data, sendUser)
+  const code = isUpdate ? 200 : 404
+  res.status(code).send({
+    code,
+    msg: isUpdate ? '更新成功' : '更新失败'
+  })
 }))
 
 Router.use((req, res)=> {
@@ -83,9 +105,13 @@ Router.use((req, res)=> {
   const msgs = req.body.errors
   if (msgs) {
     if (Array.isArray(msgs)) {
-      msg = req.body.errors.map((item: any)=> {
-        return item.msg
-      })
+      if (msgs.length == 1) {
+        msg = msgs[0]
+      } else if (msg.length >= 2) {
+        msg = req.body.errors.map((item: any)=> {
+          return item.msg
+        })
+      }
     } else if (typeof msgs == 'string') {
       msg = msgs
     }
